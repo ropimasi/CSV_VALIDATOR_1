@@ -17,31 +17,37 @@ import java.time.format.DateTimeParseException;
 // Programa para validar arquivo CSV.
 public class CSVValidator1 {
 
+	public static final String PENDING_DIR_NAME = "PENDENTE";
+	public static final String VALID_DIR_NAME = "VALIDO";
+	public static final String INVALID_DIR_NAME = "INVALIDO";
+
 	// Definição dos caminhos: na raiz do projeto.
-	public static final Path PENDENTE_DIR = Paths.get("PENDENTE");
-	private static final Path VALIDO_DIR = Paths.get("VALIDO");
-	private static final Path INVALIDO_DIR = Paths.get("INVALIDO");
+	public static final Path PENDING_DIR_PATH = Paths.get(PENDING_DIR_NAME);
+	private static final Path VALID_DIR_PATH = Paths.get(VALID_DIR_NAME);
+	private static final Path INVALID_DIR_PATH = Paths.get(INVALID_DIR_NAME);
+
 	// Definição do formato de data-hora: 31/12/2025 23:59:59
-	private static final DateTimeFormatter FORMATO_DATA_HORA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+	private static final DateTimeFormatter DATE_HOUR_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
 
 
 	public static void main(String[] args) {
 		try {
-			configurarDiretorios();
+			configDirectories();
 
 			// Por arquivos .csv do diretório em um array de arquivos.
-			File pasta = PENDENTE_DIR.toFile();
-			File[] arquivos = pasta.listFiles();
+			File folder = PENDING_DIR_PATH.toFile();
+			File[] files = folder.listFiles();
 
-			if (arquivos != null) {
-				for (File arquivo : arquivos) {
-					if (arquivo.isFile() && arquivo.getName().endsWith(".csv")) {
-						processarArquivo(arquivo.toPath());
+			if (files != null && files.length > 0) {
+				for (File file : files) {
+					if (file.isFile() && file.getName().endsWith(".csv")) {
+						validateFiles(file.toPath());
 					}
 				}
 			} else {
-				System.out.println("Nenhum arquivo.CSV encontrado no diretório PENDENTE.");
+				System.out.println("Erro de leitura de arquivos no diretório '" + PENDING_DIR_NAME
+						+ "'. Arquivo .csv não encontrado, ou não é diretório válido, ou não tem permissão de leitura.");
 			}
 
 		} catch (IOException e) {
@@ -52,82 +58,82 @@ public class CSVValidator1 {
 
 
 
-	private static void configurarDiretorios() throws IOException {
-		if (!Files.exists(PENDENTE_DIR)) {
+	private static void configDirectories() throws IOException {
+		if (!Files.exists(PENDING_DIR_PATH)) {
 			System.out.println("Diretório de arquivos pendentes não existe.");
-			System.out.println("Criando diretório PENDENTE...");
-			Files.createDirectories(PENDENTE_DIR);
-			System.out.println("Caminho: " + PENDENTE_DIR.toAbsolutePath());
-			System.out.println(
-					"Encerrando o programa. Coloque os arquivos CSV no diretório PENDENTE e execute novamente.");
+			System.out.println("Criando diretório '" + PENDING_DIR_NAME + "'...");
+			Files.createDirectories(PENDING_DIR_PATH);
+			System.out.println("Caminho: " + PENDING_DIR_PATH.toAbsolutePath());
+			System.out.println("Encerrando o programa. Coloque os arquivos CSV no diretório '" + PENDING_DIR_NAME
+					+ "' e execute novamente.");
 			return;
 		}
 
-		if (!Files.exists(VALIDO_DIR)) {
+		if (!Files.exists(VALID_DIR_PATH)) {
 			System.out.println("Criando diretório VALIDO...");
-			Files.createDirectories(VALIDO_DIR);
+			Files.createDirectories(VALID_DIR_PATH);
 		}
 
-		if (!Files.exists(INVALIDO_DIR)) {
+		if (!Files.exists(INVALID_DIR_PATH)) {
 			System.out.println("Criando diretório INVALIDO...");
-			Files.createDirectories(INVALIDO_DIR);
+			Files.createDirectories(INVALID_DIR_PATH);
 		}
 	}
 
 
 
-	private static void processarArquivo(Path arquivo) {
-		String nomeArquivo = arquivo.getFileName().toString();
+	private static void validateFiles(Path arquivo) {
+		String fileName = arquivo.getFileName().toString();
 
 		// O uso de resolve() combina o caminho da pasta com o nome do arquivo
 		try (BufferedReader reader = Files.newBufferedReader(arquivo);
-				BufferedWriter writerValido = Files.newBufferedWriter(VALIDO_DIR.resolve(nomeArquivo));
-				BufferedWriter writerInvalido = Files.newBufferedWriter(INVALIDO_DIR.resolve(nomeArquivo))) {
+				BufferedWriter writerValid = Files.newBufferedWriter(VALID_DIR_PATH.resolve(fileName));
+				BufferedWriter writerInvalid = Files.newBufferedWriter(INVALID_DIR_PATH.resolve(fileName))) {
 
-			String linha;
-			while ((linha = reader.readLine()) != null) {
-				String[] campos = linha.split(";");
+			String line;
+			while ((line = reader.readLine()) != null) {
+				String[] fields = line.split(";", -1);
 
-				if (isLinhaValida(campos)) {
-					writerValido.write(linha);
-					writerValido.newLine();
+				if (isValidLine(fields)) {
+					writerValid.write(line);
+					writerValid.newLine();
 				} else {
-					writerInvalido.write(linha);
-					writerInvalido.newLine();
+					writerInvalid.write(line);
+					writerInvalid.newLine();
 				}
 			}
-			System.out.println("Processado: " + nomeArquivo);
+			System.out.println("Processado: " + fileName);
 
 		} catch (IOException e) {
-			System.err.println("Erro ao processar " + nomeArquivo + ": " + e.getMessage());
+			System.err.println("Erro ao processar " + fileName + ": " + e.getMessage());
 		}
 	}
 
 
 
 	// Método centralizador de regras de validação.
-	private static boolean isLinhaValida(String[] campos) {
+	private static boolean isValidLine(String[] fields) {
 		// Regra 1: Deve ter exatamente 5 campos.
-		if (campos.length != 5) {
+		if (fields.length != 5) {
 			return false;
 		}
 
 		// Regra 2: Nenhum campo pode ser vazio ou só espaços.
-		for (String campo : campos) {
-			if (campo == null || campo.isBlank()) {
+		for (String field : fields) {
+			if (field == null || field.isBlank()) {
 				return false;
 			}
 		}
 
 		// Regra 3: Validar se os campos 0, 1, 2 e 3 são Inteiros.
 		for (int i = 0; i <= 3; i++) {
-			if (!isInteger(campos[i])) {
+			if (!isInteger(fields[i])) {
 				return false;
 			}
 		}
 
 		// Regra 4: O campo 4 tem que ser DateTime.
-		if (!isDateTime(campos[4])) {
+		if (!isDateTime(fields[4])) {
 			return false;
 		}
 
@@ -137,9 +143,9 @@ public class CSVValidator1 {
 
 
 	// Método auxiliar para testar se a String é um Integer válido.
-	private static boolean isInteger(String valor) {
+	private static boolean isInteger(String value) {
 		try {
-			Integer.parseInt(valor.trim());
+			Integer.parseInt(value.trim());
 			return true;
 		} catch (NumberFormatException e) {
 			return false;
@@ -149,9 +155,9 @@ public class CSVValidator1 {
 
 
 	// Método auxiliar para testar se a String é um LocalDateTime válido.
-	private static boolean isDateTime(String valor) {
+	private static boolean isDateTime(String date) {
 		try {
-			LocalDateTime.parse(valor.trim(), FORMATO_DATA_HORA);
+			LocalDateTime.parse(date.trim(), DATE_HOUR_FORMAT);
 			return true;
 		} catch (DateTimeParseException e) {
 			return false;
