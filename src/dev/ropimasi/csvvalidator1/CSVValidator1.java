@@ -15,7 +15,7 @@ import java.time.format.DateTimeParseException;
 
 
 // Programa para validar arquivo CSV.
-public class ValidadorCSV1 {
+public class CSVValidator1 {
 
 	// Definição dos caminhos: na raiz do projeto.
 	public static final Path PENDENTE_DIR = Paths.get("PENDENTE");
