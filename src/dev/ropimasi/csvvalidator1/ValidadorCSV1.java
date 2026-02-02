@@ -1,4 +1,4 @@
-package dev.ropimasi.validadorcsv1;
+package dev.ropimasi.csvvalidator1;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
