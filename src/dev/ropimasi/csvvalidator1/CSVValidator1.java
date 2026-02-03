@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Objects;
 
 
 
@@ -30,12 +31,15 @@ public class CSVValidator1 {
 	// Definição do formato de data-hora: 31/12/2025 23:59:59
 	private static final DateTimeFormatter DATE_HOUR_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
+	// Definição do separador de campos no CSV.
+	private static final String FIELDS_SEPARATOR = ";";
+
 
 
 	public static void main(String[] args) {
-		
+
 		System.out.println("Iniciando o validador de arquivos CSV...");
-		
+
 		try {
 			configDirectories();
 
@@ -56,7 +60,7 @@ public class CSVValidator1 {
 			System.err.println("Erro ao configurar diretórios: " + e.getMessage());
 			return;
 		}
-		
+
 		System.out.println("\nProcessamento concluído.");
 	}
 
@@ -106,13 +110,13 @@ public class CSVValidator1 {
 				BufferedWriter writerInvalid = Files.newBufferedWriter(INVALID_DIR_PATH.resolve(fileName))) {
 
 			System.out.println("\nIniciando processamento do arquivo: " + fileName);
-			
+
 			String line;
 			while ((line = reader.readLine()) != null) {
-				String[] fields = line.split(";", -1);
+				String[] fields = line.split(FIELDS_SEPARATOR, -1);
 
 				System.out.print("Validando linha: " + line + " :");
-				
+
 				if (isValidLine(fields)) {
 					writerValid.write(line);
 					writerValid.newLine();
@@ -134,30 +138,55 @@ public class CSVValidator1 {
 
 	// Método centralizador de regras de validação.
 	private static boolean isValidLine(String[] fields) {
-		// Regra 1: Deve ter exatamente 5 campos.
-		if (fields.length != 5) {
+		if (!hasFiveFields(fields)) {
 			return false;
 		}
 
-		// Regra 2: Nenhum campo pode ser vazio ou só espaços.
+		if (!hasNoBlankFields(fields)) {
+			return false;
+		}
+
+		if (!hasIntegerFields(fields, 0, 1, 2, 3)) {
+			return false;
+		}
+
+		if (!hasDateTimeFields(fields, 4)) {
+			return false;
+		}
+
+		return true;
+	}
+
+
+
+	// Método auxiliar: Regra 1: Deve ter exatamente 5 campos.
+	private static boolean hasFiveFields(String[] fields) {
+		return fields.length == 5;
+	}
+
+
+
+	// Método auxiliar: Regra 2: Nenhum campo pode ser vazio ou só espaços.
+	private static boolean hasNoBlankFields(String[] fields) {
 		for (String field : fields) {
 			if (field == null || field.isBlank()) {
 				return false;
 			}
 		}
+		return true;
+	}
 
-		// Regra 3: Validar se os campos 0, 1, 2 e 3 são Inteiros.
-		for (int i = 0; i <= 3; i++) {
+
+
+	// Método auxiliar: Regra 3: Validar se os campos indicados são Integer. 
+	private static boolean hasIntegerFields(String[] fields, Integer... indexes) {
+		Objects.requireNonNull(indexes, "Indexes cannot be null");
+
+		for (int i : indexes) {
 			if (!isInteger(fields[i])) {
 				return false;
 			}
 		}
-
-		// Regra 4: O campo 4 tem que ser DateTime.
-		if (!isDateTime(fields[4])) {
-			return false;
-		}
-
 		return true;
 	}
 
@@ -171,6 +200,21 @@ public class CSVValidator1 {
 		} catch (NumberFormatException e) {
 			return false;
 		}
+	}
+
+
+
+	// Método auxiliar: Regra 4: Validar se os campos indicados são DateTime.
+	private static boolean hasDateTimeFields(String[] fields, Integer... indexes) {
+		Objects.requireNonNull(indexes, "Indexes cannot be null");
+
+		for (int i : indexes) {
+			if (!isDateTime(fields[i])) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 
