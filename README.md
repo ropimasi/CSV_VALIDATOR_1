@@ -7,7 +7,7 @@
   
 Este projeto é um utilitário robusto desenvolvido em Java para a validação e triagem automatizada de arquivos no formato .csv.  
 Ele atua como um filtro de integridade, garantindo que apenas dados que seguem regras estruturais e de tipagem rigorosas cheguem ao seu destino final.  
-O validador foi desenhado para processar arquivos em lote. Ele lê todos os arquivos do tipo .csv de uma pasta de entrada, analisa linha por linha e separa os registros em arquivos de "Sucesso" ou "Erro", sem corromper os arquivos originais.  
+O validador foi desenhado para processar arquivos em lote. Ele lê todos os arquivos do tipo .csv de uma pasta de entrada, analisa linha por linha e separa os registros em arquivos de "Sucesso" ou de "Erro", sem corromper os arquivos originais.  
 
 &nbsp;  
 &nbsp;  
@@ -23,11 +23,11 @@ Datas: java.time (API moderna de data e hora).
 &nbsp;  
 
 ### ⚙️ Regras de Validação
-Para que uma linha seja considerada VÁLIDA, ela deve cumprir simultaneamente os seguintes requisitos:
+Para que uma linha seja considerada **válida**, ela deve cumprir simultaneamente os seguintes requisitos:
  - Estrutura: Deve conter exatamente 5 campos separados por ponto e vírgula (;).
  - Preenchimento: Nenhum campo pode estar vazio ou conter apenas espaços em branco.
  - Tipagem Numérica: Os campos 1, 2, 3 e 4 devem ser obrigatoriamente números inteiros (Integer).
- - Tipagem de Data: O campo 5 deve seguir o padrão de data e hora: dd/MM/yyyy HH:mm:ss.  
+ - Tipagem de Data: O campo 5 deve seguir o padrão de data e hora: `dd/MM/yyyy HH:mm:ss`.  
 
 &nbsp;  
 &nbsp;  
@@ -35,9 +35,9 @@ Para que uma linha seja considerada VÁLIDA, ela deve cumprir simultaneamente os
 
 ### 📂 Estrutura de Pastas
 O programa gerencia automaticamente os diretórios na raiz do projeto:
- - /PENDENTE: Local onde você deve depositar os arquivos .csv para processamento.
- - /VALIDOS: Contém arquivos gerados apenas com as linhas que passaram em todas as regras.
- - /INVALIDOS: Contém arquivos gerados com as linhas que falharam em algum critério.  
+ - `/PENDENTE`: Local onde você deve depositar os arquivos .csv para processamento.
+ - `/VALIDOS`: Contém arquivos gerados apenas com as linhas que passaram em todas as regras.
+ - `/INVALIDOS`: Contém arquivos gerados com as linhas que falharam em algum critério.  
 
 &nbsp;  
 &nbsp;  
@@ -59,8 +59,8 @@ Passo a Passo:
 &nbsp;  
 
 ### 📝 Exemplo de Dados
-Linha Válida (Exemplo): 101;202;303;6;25/12/2026 14:30:00
-Linha Inválida (Exemplo): 101;abc;303;2;25/12/2026 (Falha: Campo 2 não é número e campo 5 está sem a hora)  
+Linha Válida (Exemplo): 101;202;303;6;25/12/2025 14:30:00
+Linha Inválida (Exemplo): 101;abc;303;2;25/12/2025 (Falha: Campo 2 não é número e campo 5 está sem a hora)  
 
 &nbsp;  
 &nbsp;  

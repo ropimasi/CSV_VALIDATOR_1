@@ -17,6 +17,7 @@ import java.time.format.DateTimeParseException;
 // Programa para validar arquivo CSV.
 public class CSVValidator1 {
 
+	// Definição dos nomes dos diretórios.
 	public static final String PENDING_DIR_NAME = "PENDENTE";
 	public static final String VALID_DIR_NAME = "VALIDO";
 	public static final String INVALID_DIR_NAME = "INVALIDO";
@@ -32,12 +33,13 @@ public class CSVValidator1 {
 
 
 	public static void main(String[] args) {
+		
+		System.out.println("Iniciando o validador de arquivos CSV...");
+		
 		try {
 			configDirectories();
 
-			// Por arquivos .csv do diretório em um array de arquivos.
-			File folder = PENDING_DIR_PATH.toFile();
-			File[] files = folder.listFiles();
+			File[] files = getArrayOfFiles();
 
 			if (files != null && files.length > 0) {
 				for (File file : files) {
@@ -47,17 +49,20 @@ public class CSVValidator1 {
 				}
 			} else {
 				System.out.println("Erro de leitura de arquivos no diretório '" + PENDING_DIR_NAME
-						+ "'. Arquivo .csv não encontrado, ou não é diretório válido, ou não tem permissão de leitura.");
+						+ "'. Arquivos .csv não encontrado, ou não tem permissão de leitura.");
 			}
 
 		} catch (IOException e) {
 			System.err.println("Erro ao configurar diretórios: " + e.getMessage());
 			return;
 		}
+		
+		System.out.println("\nProcessamento concluído.");
 	}
 
 
 
+	// Método para configurar os diretórios necessários.
 	private static void configDirectories() throws IOException {
 		if (!Files.exists(PENDING_DIR_PATH)) {
 			System.out.println("Diretório de arquivos pendentes não existe.");
@@ -82,6 +87,16 @@ public class CSVValidator1 {
 
 
 
+	// Método auxiliar para por arquivos .csv do diretório em um array de arquivos.
+	protected static File[] getArrayOfFiles() {
+		File folder = PENDING_DIR_PATH.toFile();
+		File[] files = folder.listFiles();
+		return files;
+	}
+
+
+
+	// Método para validar os arquivos CSV.
 	private static void validateFiles(Path arquivo) {
 		String fileName = arquivo.getFileName().toString();
 
@@ -90,16 +105,22 @@ public class CSVValidator1 {
 				BufferedWriter writerValid = Files.newBufferedWriter(VALID_DIR_PATH.resolve(fileName));
 				BufferedWriter writerInvalid = Files.newBufferedWriter(INVALID_DIR_PATH.resolve(fileName))) {
 
+			System.out.println("\nIniciando processamento do arquivo: " + fileName);
+			
 			String line;
 			while ((line = reader.readLine()) != null) {
 				String[] fields = line.split(";", -1);
 
+				System.out.print("Validando linha: " + line + " :");
+				
 				if (isValidLine(fields)) {
 					writerValid.write(line);
 					writerValid.newLine();
+					System.out.println("Linha válida.");
 				} else {
 					writerInvalid.write(line);
 					writerInvalid.newLine();
+					System.out.println("Linha inválida.");
 				}
 			}
 			System.out.println("Processado: " + fileName);
